@@ -243,7 +243,19 @@ endGame mboard gboard = (contaFechadas gboard) == (contaMinas mboard)
 -- Usar como referncia de implementacao o video sobre tabela de vendas (Aula 06)
 
 
--- printBoard :: GBoard -> String
+printBoard :: GBoard -> String
+printBoard [] = "\n"
+printBoard (x:xs) = show x ++ printBoard xs
+
+    where
+        printHeader :: Int -> String
+        printHeader 0 = "  " ++ show 0 ++ " "
+        printHeader tam = printHeader (tam-1) ++ " " ++ show tam
+        printLHeader :: Int -> GBoard -> String
+        printLHeader 0 gboard = show "0 " ++ printLine gboard
+        printHeader tam (x:xs) = 
+        printLine :: [Char] -> 
+        getLine :: GBoard -> [Char]
 
 
 -- geraLista: recebe um inteiro n, um valor v, e gera uma lista contendo n vezes o valor v
