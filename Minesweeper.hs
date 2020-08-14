@@ -30,17 +30,20 @@ gBoard = [['-','-','-','-','-','-','-','-','-'],
 -- Exemplo de tabuleiro 9x9 com a posição das minas:
 
 mBoard :: MBoard
-mBoard = [[False, False, False, False, False, False, False, False, False],
+mBoard = [[True, False, False, False, False, False, False, True, False],
           [False, False, False, False, False, False, False, False, False],
           [False, False, False, False, False, False, False, False, False],
-          [False, False, False, False, False, False, False, False, False],
-          [False, False, False, False, True , False, False, False, False],
-          [False, False, False, False, False, True, False, False, False],
-          [False, False, False, False, False, False, False, False, False],
+          [False, False, False, False, True, True, True, False, False],
+          [False, False, False, False, True , False, True, True, False],
+          [False, False, False, False, True, True, True, False, False],
+          [False, False, True, False, False, False, False, False, False],
           [False, False, False, False, False, False, False, False, False],
           [False, False, False, False, False, False, False, False, False]]
 
 
+getSize :: [t] -> Int
+getSize [] = 0
+getSize (x:xs) = 1 + getSize xs
 
 
 -- PRIMEIRA PARTE - FUNÇÕES PARA MANIPULAR OS TABULEIROS DO JOGO (MATRIZES)
@@ -103,7 +106,7 @@ isMine l c board = gPos l c board
 -- uma linha e uma coluna, e diz se essa posição é válida no tabuleiro
 
 isValidPos :: Int -> Int -> Int -> Bool
-isValidPos tam l c = not (l >= tam || l < 0) || (c >= tam || c < 0 )
+isValidPos tam l c = not ((l >= tam || l < 0) || (c >= tam || c < 0 ))
 
 -- 
 -- validMoves: Dado o tamanho do tabuleiro e uma posição atual (linha e coluna), retorna uma lista
@@ -149,9 +152,6 @@ cMinas l c mboard = countMines (validMoves (getSize mboard) l c) mboard
         countMines ((xa,xb):xs) mboard
             | isMine xa xb mboard = 1 + countMines xs mboard
             | otherwise           = countMines xs mboard
-        getSize :: MBoard -> Int
-        getSize [] = 0
-        getSize (x:xs) = 1 + getSize xs 
 
 ---
 --- abreJogada: é a função principal do jogo!!
@@ -174,14 +174,11 @@ abreJogada l c mboard gboard
     | cMinas l c mboard > 0 = uPos l c (intToDigit (cMinas l c mboard)) gboard
     | otherwise             = abreJgRec (validMoves (getSize mboard) l c) mboard (uPos l c (intToDigit 0) gboard)
 
-    where
-        getSize :: MBoard -> Int
-        getSize [] = 0
-        getSize (x:xs) = 1 + getSize xs 
+    where 
         opened :: Int -> Int -> GBoard -> Bool
         opened l c gboard = not (gPos l c gboard == '-')
         abreJgRec :: [(Int,Int)] -> MBoard -> GBoard -> GBoard
-        abreJgRec [] _ gboard = gboard
+        abreJgRec [] mboard gboard = gboard
         abreJgRec ((xl,xc):xs) mboard gboard = abreJgRec xs mboard (abreJogada xl xc mboard gboard)
 
 
@@ -189,16 +186,48 @@ abreJogada l c mboard gboard
 --- onde estão as minas e os números nas posições adjecentes às minas. Essa função é usada para mostrar
 --- todo o tabuleiro no caso de vitória ou derrota
 
--- abreTabuleiro :: MBoard -> GBoard -> GBoard
+abreTabuleiro :: MBoard -> GBoard -> GBoard
+abreTabuleiro mboard gboard = abreTab 0 0 mboard gboard
+
+    where
+        opened :: Int -> Int -> GBoard -> Bool
+        opened l c gboard = not (gPos l c gboard == '-')
+        abreTab :: Int -> Int -> MBoard -> GBoard -> GBoard
+        abreTab l c mboard gboard
+            | opened l c gboard = gboard
+            | isMine l c mboard = abreRec (validMoves (getSize mboard) l c) mboard (uPos l c '*' gboard)
+            | otherwise         = abreRec (validMoves (getSize mboard) l c) mboard (uPos l c (intToDigit (cMinas l c mboard)) gboard)
+        abreRec :: [(Int, Int)] -> MBoard -> GBoard -> GBoard
+        abreRec [] mboard gboard = gboard
+        abreRec ((xl,xc):xs) mboard gboard = abreRec xs mboard (abreTab xl xc mboard gboard)
+
 
 
 --  -- contaFechadas: Recebe um GBoard e conta quantas posições fechadas existem no tabuleiro (posições com '-')
 
--- contaFechadas :: GBoard -> Int
+contaFechadas :: GBoard -> Int
+contaFechadas []     = 0
+contaFechadas (x:xs) = contaLinha x + contaFechadas xs 
+
+    where
+        contaLinha :: [Char] -> Int
+        contaLinha [] = 0
+        contaLinha (x:xs)
+            | x == '-'  = 1 + contaLinha xs
+            | otherwise = contaLinha xs
 
 -- contaMinas: Recebe o tabuleiro de Minas (MBoard) e conta quantas minas existem no jogo
 
---contaMinas :: MBoard -> Int
+contaMinas :: MBoard -> Int
+contaMinas [] = 0
+contaMinas (x:xs) = contaLinha x + contaMinas xs
+
+    where
+        contaLinha :: [Bool] -> Int
+        contaLinha [] = 0
+        contaLinha (x:xs)
+            | x         = 1 + contaLinha xs
+            | otherwise = contaLinha xs
 
 -- endGame: recebe o tabuleiro de minas, o tabuleiro do jogo, e diz se o jogo acabou.
 -- O jogo acabou quando o número de casas fechadas é igual ao numero de minas
