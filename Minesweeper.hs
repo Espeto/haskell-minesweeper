@@ -64,13 +64,13 @@ gArr pos vec = getPos pos vec
 -- novo vetor com o valor v na posição p 
 
 uArr :: Int -> a -> [a] -> [a]
-uArr p v vetor = changeVal 0 p v vetor
+uArr pos nv vetor = changeVal pos nv vetor
 
     where
-        changeVal :: Int -> Int -> a -> [a] -> [a]
-        changeVal counter p v (x:xs)
-            | counter == p  = v : xs
-            | otherwise     = x : changeVal (counter+1) p v xs
+        changeVal :: Int -> a -> [a] -> [a]
+        changeVal pos nv (x:xs)
+            | pos == 0  = nv : xs
+            | otherwise = x : changeVal (pos-1) nv xs
 
 
 -- Uma matriz, nada mais é do que um vetor de vetores. 
