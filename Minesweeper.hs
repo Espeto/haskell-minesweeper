@@ -232,7 +232,8 @@ contaMinas (x:xs) = contaLinha x + contaMinas xs
 -- endGame: recebe o tabuleiro de minas, o tabuleiro do jogo, e diz se o jogo acabou.
 -- O jogo acabou quando o número de casas fechadas é igual ao numero de minas
 
--- endGame :: MBoard -> GBoard -> Bool
+endGame :: MBoard -> GBoard -> Bool
+endGame mboard gboard = (contaFechadas gboard) == (contaMinas mboard) 
 
 ---
 ---  PARTE 3: FUNÇÕES PARA GERAR TABULEIROS E IMPRIMIR TABULEIROS
