@@ -88,13 +88,8 @@ gPos l c board = gArr c (gArr l board)
 
 
 uPos :: Int -> Int ->  a -> [[a]] -> [[a]]
-uPos l c nv board = modify 0 l c nv board
+uPos l c nv board = uArr l ( uArr c nv (gArr l board)) board
 
-    where
-        modify :: Int -> Int -> Int -> a -> [[a]] -> [[a]]
-        modify counter l c nv (x:xs)
-            | counter == l  = (uArr c nv x) : xs
-            | otherwise     =  x : modify (counter+1) l c nv xs
 
 --------------- SEGUNDA PARTE: LÓGICA DO JOGO
 
@@ -108,9 +103,7 @@ isMine l c board = gPos l c board
 -- uma linha e uma coluna, e diz se essa posição é válida no tabuleiro
 
 isValidPos :: Int -> Int -> Int -> Bool
-isValidPos tam l c
-    | (l >= tam || l < 0) || (c >= tam || c < 0 ) = False
-    | otherwise                                   = True
+isValidPos tam l c = not (l >= tam || l < 0) || (c >= tam || c < 0 )
 
 -- 
 -- validMoves: Dado o tamanho do tabuleiro e uma posição atual (linha e coluna), retorna uma lista
@@ -131,7 +124,7 @@ isValidPos tam l c
 
 validMoves :: Int -> Int -> Int -> [(Int,Int)]
 validMoves tam l c
-    | not (isValidPos tam l c) = []
+    | not (isValidPos tam l c) = error "Posição Inválida"
     | otherwise                = checkMoves tam (genMoves l c)
 
 
