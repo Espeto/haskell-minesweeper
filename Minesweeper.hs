@@ -55,25 +55,26 @@ getSize (x:xs) = 1 + getSize xs
 -- na posição p do vetor
 
 gArr :: Int -> [t] -> t
-gArr pos vec = getPos pos vec
+gArr pos vec = getPos 0 pos vec
 
     where
-        getPos :: Int -> [t] -> t
-        getPos pos (x:xs)
-            | pos == 0    = x
-            | otherwise   = getPos (pos-1) xs
+        getPos :: Int -> Int -> [t] -> t
+        --getPos _ _ [] = error "Posição inválida"
+        getPos counter pos (x:xs)
+            | counter == pos    = x
+            | otherwise         = getPos (counter + 1) pos xs
 
 -- uArr (update array): recebe uma posição (p), um novo valor (v), e uma lista (vetor) e devolve um
 -- novo vetor com o valor v na posição p 
 
 uArr :: Int -> a -> [a] -> [a]
-uArr pos nv vetor = changeVal pos nv vetor
+uArr pos nv vetor = changeVal 0 pos nv vetor
 
     where
-        changeVal :: Int -> a -> [a] -> [a]
-        changeVal pos nv (x:xs)
-            | pos == 0  = nv : xs
-            | otherwise = x : changeVal (pos-1) nv xs
+        changeVal :: Int -> Int -> a -> [a] -> [a]
+        changeVal counter pos nv (x:xs)
+            | counter == pos  = nv : xs
+            | otherwise = x : changeVal (counter+1) pos nv xs
 
 
 -- Uma matriz, nada mais é do que um vetor de vetores. 
@@ -244,42 +245,45 @@ endGame mboard gboard = (contaFechadas gboard) == (contaMinas mboard)
 
 
 printBoard :: GBoard -> String
-printBoard [] = "\n"
-printBoard (x:xs) = show x ++ printBoard xs
+printBoard board = printHeader ((getSize board)-1) ++ printLHeader ((getSize board)-1) board ++ "\n"
 
-    where
+    where 
         printHeader :: Int -> String
-        printHeader 0 = "  " ++ show 0 ++ " "
-        printHeader tam = printHeader (tam-1) ++ " " ++ show tam
+        printHeader 0 = "  " ++ show 0
+        printHeader tam = printHeader (tam-1) ++ " " ++ show (tam)
         printLHeader :: Int -> GBoard -> String
-        printLHeader 0 gboard = show "0 " ++ printLine gboard
-        printHeader tam (x:xs) = 
-        printLine :: [Char] -> 
-        getLine :: GBoard -> [Char]
+        printLHeader 0 board = "\n" ++ show 0 ++ " " ++ printLine (gArr 0 board)
+        printLHeader pos board = printLHeader (pos-1) board ++ (show pos) ++ " " ++ printLine (gArr pos board)
+        printLine :: [Char] -> String
+        printLine [] = "\n"
+        printLine (x:xs) = x : " " ++ printLine xs
 
 
 -- geraLista: recebe um inteiro n, um valor v, e gera uma lista contendo n vezes o valor v
 
--- geraLista :: Int -> a -> [a]
+geraLista :: Int -> a -> [a]
+geraLista 1 v = [v]
+geraLista n v = v : geraLista (n-1) v
 
 -- geraTabuleiro: recebe o tamanho do tabuleiro e gera um tabuleiro  novo, todo fechado (todas as posições
 -- contém '-'). A função geraLista deve ser usada na implementação
 
--- geraNovoTabuleiro :: Int -> GBoard
+geraNovoTabuleiro :: Int -> GBoard
+geraNovoTabuleiro n = geraLista n (geraLista n '-')
 
 -- geraMapaDeMinasZerado: recebe o tamanho do tabuleiro e gera um mapa de minas zerado, com todas as posições
 -- contendo False. Usar geraLista na implementação
 
--- geraMapaDeMinasZerado :: Int -> MBoard
-
+geraMapaDeMinasZerado :: Int -> MBoard
+geraMapaDeMinasZerado n = geraLista n (geraLista n False)
 
 -- A função a seguir (main) deve ser substituida pela função main comentada mais
 -- abaixo quando o jogo estiver pronto
 
-main :: IO ()
-main = print "Alo Mundo!"
+-- main :: IO ()
+-- main = print "Alo Mundo!"
 
-{-
+
 
 -- Aqui está o Motor do Jogo.
 -- Essa parte deve ser descomentada quando as outras funções estiverem implementadas
@@ -334,4 +338,3 @@ addMines n size b = do
                       True -> addMines n size b
                       False -> addMines (n-1) size (uPos l c True b)
 
--}
